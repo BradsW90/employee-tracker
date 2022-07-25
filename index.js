@@ -32,10 +32,13 @@ const mainMenu = () => {
         case "View all roles":
           const roles = new storeFunctions();
           return roles.start().then(roles.queryRoles);
+        case "View all employees":
+          const employees = new storeFunctions();
+          return employees.start().then(employees.queryEmployees);
       }
     })
-    .then((departments) => {
-      console.table(departments);
+    .then((selection) => {
+      console.table(selection);
     })
     .then(mainMenu);
 };

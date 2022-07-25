@@ -29,6 +29,19 @@ class Store {
 
     return rows;
   }
+
+  async queryEmployees(connection) {
+    const [rows, fields] =
+      await connection.execute(`SELECT t1.id, t1.first_name, t1.last_name, roles.salary, roles.title, t2.first_name
+    AS managers
+    FROM employees t1
+    INNER JOIN roles
+    ON t1.role_id = roles.id
+    LEFT JOIN employees t2
+    ON t1.id = t2.manager_id`);
+
+    return rows;
+  }
 }
 
 module.exports = Store;
