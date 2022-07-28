@@ -2,6 +2,7 @@ class Store {
   async start(addOrDelete) {
     const mysql = require("mysql2/promise");
 
+    //creates db connection instance
     const connection = await mysql.createConnection({
       host: "localhost",
       user: "root",
@@ -11,20 +12,23 @@ class Store {
 
     const array = [connection, addOrDelete];
 
+    //return cunnection and secondary pass in arguement
     return array;
-  }
+  } // end of start method
 
   async queryDepartment() {
-    //console.log("querydepartment");
+    //creates variable containing db query results
     const results = await this.start().then((connection) => {
       const rows = connection[0].execute(`SELECT * FROM department`);
       return rows;
     });
 
+    //returning rows data
     return results[0];
-  }
+  } //end of queryDepartment method
 
   async queryRoles() {
+    //creates variable containing db query results
     const results = await this.start().then((connection) => {
       const rows = connection[0]
         .execute(`SELECT roles.id, roles.title, roles.salary, department.name
@@ -36,10 +40,12 @@ class Store {
       return rows;
     });
 
+    //returning rows data
     return results[0];
-  }
+  } //end of queryRoles method
 
   async queryEmployees() {
+    //creates variable containing db query results
     const results = await this.start().then((connection) => {
       const rows = connection[0]
         .execute(`SELECT t1.id, t1.first_name, t1.last_name, roles.salary, roles.title, t2.first_name
@@ -53,19 +59,28 @@ class Store {
       return rows;
     });
 
+    //returns rows data
     return results[0];
-  }
+  } //end of queryEmployees method
 
   async addDepartment(addOrDelete) {
-    const results = await this.start();
-  }
+    this.start().then((connection) => {
+      const insert = connection[0].execute(
+        `INSERT INTO department (name)
+      VALUES (?)`,
+        [addOrDelete.name]
+      );
+      console.log("Department added Successfully!");
+    });
+    return;
+  } //end of addDepartment method
 
   async addRole(addOrDelete) {
     const department = await this.start().then(this.queryDepartment);
 
     for (a = 0; a < department.length; a++) {
       if (addOrDelete.department === department[a].name) {
-        const addRoleData = await this.start().then((connection) => {
+        this.start().then((connection) => {
           const insert = connection[0].execute(
             `INSERT INTO roles (title, salary, department_id)
         VALUES (?,?,?)`,
@@ -75,10 +90,10 @@ class Store {
           return insert;
         });
 
-        return addRoleData;
+        return;
       }
     }
-  }
-}
+  } //end addRole Method
+} //end store class
 
 module.exports = Store;
