@@ -7,6 +7,49 @@ const consoleTable = require("console.table");
 // | /-----------------------------------/   +---------------------------------------+ |
 // +----------------------------------+`);
 
+const employee = (roles) => {
+  let roleList = [];
+
+  for (let b = 0; b < roles.length; b++) {
+    roleList.push(roles[b].id + " " + roles[b].title);
+  }
+
+  return inquirer.prompt([
+    {
+      type: "input",
+      name: "first_name",
+      message: "Enter the employees first name.",
+      validate: (first_name) => {
+        if (first_name) {
+          return true;
+        } else {
+          console.log("Please enter the employees first name!");
+          return false;
+        }
+      },
+    },
+    {
+      type: "input",
+      name: "last_name",
+      message: "Enter the employees last name.",
+      validate: (last_name) => {
+        if (last_name) {
+          return true;
+        } else {
+          console.log("Please enter the employees last name!");
+          return false;
+        }
+      },
+    },
+    {
+      type: "list",
+      name: "role_id",
+      message: "What role will the employee fulfill?",
+      choices: roleList,
+    },
+  ]);
+};
+
 const department = () => {
   return inquirer.prompt([
     {
@@ -29,7 +72,7 @@ const role = (department) => {
   let list = [];
 
   for (i = 0; i < department.length; i++) {
-    list.push(department[i].name);
+    list.push(department[i].id + " " + department[i].name);
   }
 
   return inquirer.prompt([
@@ -106,10 +149,23 @@ const mainMenu = () => {
           });
         case "Add a department":
           const newDepartment = new storeFunctions();
-          return department().then(newDepartment.addDepartment);
+          return department()
+            .then(newDepartment.start)
+            .then(newDepartment.addDepartment);
         case "Add a role":
           const newrole = new storeFunctions();
-          return newrole.queryDepartment().then(role).then(newrole.addRole);
+          return newrole
+            .queryDepartment()
+            .then(role)
+            .then(newrole.start)
+            .then(newrole.addRole);
+        case "Add an employee":
+          const newEmployee = new storeFunctions();
+          return newEmployee
+            .queryRoles()
+            .then(employee)
+            .then(newEmployee.start)
+            .then(newEmployee.addEmployee);
       }
     })
     .then(mainMenu);
