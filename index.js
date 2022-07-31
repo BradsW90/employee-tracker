@@ -7,11 +7,72 @@ const consoleTable = require("console.table");
 // | /-----------------------------------/   +---------------------------------------+ |
 // +----------------------------------+`);
 
-const employee = (roles) => {
-  let roleList = [];
+//updates chosen current employee role
+const update = async (connection) => {
+  //grabs first name and last name of employee table
+  const employeeOutput = await connection[0]
+    .execute(`SELECT CONCAT(first_name, ' ', last_name)
+  AS name
+  FROM employees`);
 
-  for (let b = 0; b < roles.length; b++) {
-    roleList.push(roles[b].id + " " + roles[b].title);
+  //grabs title column from roles table
+  const roleOutput = await connection[0].execute(`SELECT title FROM roles`);
+
+  //main empty array
+  let outputList = [];
+  // first secondary array
+  let temp1 = [];
+
+  //for loop to change objects to array of strings
+  for (let j = 0; j < employeeOutput[0].length; j++) {
+    temp1.push(employeeOutput[0][j].name);
+  }
+
+  //pushes temp to main array
+  outputList.push(temp1);
+  //second secondary array
+  let temp2 = [];
+
+  //for loop to change objects to array of strings
+  for (let k = 0; k < roleOutput[0].length; k++) {
+    temp2.push(roleOutput[0][k].title);
+  }
+
+  //pushes second secondary to main array
+  outputList.push(temp2);
+
+  return inquirer.prompt([
+    {
+      type: "list",
+      name: "updateEmployee",
+      message: "Select the employee whose role you would like to update.",
+      choices: outputList[0],
+    },
+    {
+      type: "list",
+      name: "newRole",
+      message: "What is the employees new role.",
+      choices: outputList[1],
+    },
+  ]);
+};
+
+//creates new employee
+const employee = (roles) => {
+  //main array
+  let storeList = [];
+
+  //for loop to iterate through arrays
+  for (let d = 0; d < roles.length; d++) {
+    // secondary array
+    let temp = [];
+
+    //changes array of objects to array of strings
+    for (let e = 0; e < roles[d].length; e++) {
+      temp.push(roles[d][e].name);
+    }
+    //stores transformed arrays
+    storeList.push(temp);
   }
 
   return inquirer.prompt([
@@ -45,7 +106,13 @@ const employee = (roles) => {
       type: "list",
       name: "role_id",
       message: "What role will the employee fulfill?",
-      choices: roleList,
+      choices: storeList[0],
+    },
+    {
+      type: "list",
+      name: "manager_id",
+      message: "What is the manager",
+      choices: storeList[1],
     },
   ]);
 };
@@ -68,10 +135,14 @@ const department = () => {
   ]);
 };
 
+//creates new role
 const role = (department) => {
+  //main array
   let list = [];
 
+  //changes array of objects to array of strings
   for (i = 0; i < department.length; i++) {
+    //adds department id to list name
     list.push(department[i].id + " " + department[i].name);
   }
 
@@ -131,6 +202,7 @@ const mainMenu = () => {
       },
     ])
     .then((choice) => {
+      //uses switch to run appropriate selection from main menu
       switch (choice.menu) {
         case "View all departments":
           const departments = new storeFunctions();
@@ -162,10 +234,18 @@ const mainMenu = () => {
         case "Add an employee":
           const newEmployee = new storeFunctions();
           return newEmployee
-            .queryRoles()
+            .start()
+            .then(newEmployee.addEmployeeQuery)
             .then(employee)
             .then(newEmployee.start)
             .then(newEmployee.addEmployee);
+        case "Update an employee role":
+          const newUpdate = new storeFunctions();
+          return newUpdate
+            .start()
+            .then(update)
+            .then(newUpdate.start)
+            .then(newUpdate.updateEmployee);
       }
     })
     .then(mainMenu);
