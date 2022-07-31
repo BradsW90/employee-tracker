@@ -85,24 +85,21 @@ class Store {
 
     //grabs department id out of string
     const input = addOrDelete[1].department_id.charAt(0);
-    //console.log(addOrDelete[1]);
-
+    const salary = parseFloat(addOrDelete[1].salary).toFixed(2);
+    //console.log(parseFloat(addOrDelete[1].salary));
     //used to get appropriate index of department for role creation
-    for (let a = 0; a < department.length; a++) {
+    for (let a = 0; a < department[0].length; a++) {
+      //console.log(department[0][0].id);
+      //console.log(parseInt(input));
       if (department[0][a].id === parseInt(input)) {
+        //console.log(department[0][a]);
         const insert = addOrDelete[0].execute(
           `INSERT INTO roles (title, salary, department_id)
-      VALUES (?,?,?)`,
-          [
-            addOrDelete[1].title,
-            parseFloat(addOrDelete[1].salary),
-            department[0][a].id,
-          ]
+        VALUES (?,?,?)`,
+          [addOrDelete[1].title, salary, department[0][a].id]
         );
         console.log("Role added successfully!");
       }
-
-      return;
     }
   } //end addRole Method
 
